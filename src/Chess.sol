@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.13;
+pragma solidity ^0.8.17;
 
-import {Error} from "./errors.sol";
+import "./Errors.sol";
 
-contract Chess is Error{
+contract Chess is Errors{
     /*//////////////////////////////////////////////////////////////
                              STATE VARIABLES
     //////////////////////////////////////////////////////////////*/
@@ -27,26 +27,23 @@ contract Chess is Error{
     uint8 constant bishop = 0x14;
     uint8 constant pawns = 0x15;
 
-
     /// @notice struct of individual chess game
     struct Game {
         address player1;
         address player2;
         address winner;
-        /// @notice current player turn to move
         address current;
-        uint wager;
+        uint256 wager;
     }
 
-   struct challenge {
-     address challenger;
-     bool isChallengeAccepted;
-     uint wager;
-   }
+    struct challenge {
+        address challenger;
+        bool isChallengeAccepted;
+        uint256 wager;
+    }
 
-    Game[] public Games; 
+    Game[] public Games;
     challenge[] public Challenges;
-
 
     /*//////////////////////////////////////////////////////////////
                              MAPPINGS
@@ -58,28 +55,27 @@ contract Chess is Error{
     /// @notice this mapping checks whether a challenge is valid using it index
     mapping(uint256 => bool) public isChallengeValid;
 
-
-
     /*//////////////////////////////////////////////////////////////
                              FUNCTIONS
     //////////////////////////////////////////////////////////////*/
 
-     //start a challenge
-    function challenge(address player2, uint256 _wager) external {
-        //challenge initialized 
-        Games.push(Game(msg.sender, player2, _wager));
-        assembly{
-            call(gas(), _wager,  player2, _wager)
-        }
+    // //start a challenge
+    function challengeAddress(address player2, uint256 _wager) external {   
+        //set challengeId to true, using the Challenges.length
+        isChallengeValid[Challenges.length] = true;
+
+        //challenge initialized
+        Games.push(Game(msg.sender, player2, address(0), address(0), _wager));
+        // assembly {
+        //     call(gas(), _wager, player2, _wager)
+        // }
     }
 
-    function move(uint gameId, uint8 piece, uint direction) external() {
-      if(isGameValid[gameId] == true) inValidMove();
+    function move(uint256 gameId, uint8 piece, uint256 direction) external {
+      if (isGameValid[gameId])   revert  inValid();
     }
 
-    function deposit() external payable {
+    // function deposit() external payable {}
 
-    }
-
-    function withdraw() external payable {}
+    // function withdraw() external payable {}
 }
