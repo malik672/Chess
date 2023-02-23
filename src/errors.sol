@@ -1,0 +1,3 @@
+contract error {
+    error inValidMove();
+}
