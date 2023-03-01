@@ -2,8 +2,21 @@
 pragma solidity ^0.8.17;
 
 import "./Errors.sol";
+import "./Utils.sol";
 
-contract Chess is Errors{
+contract Chess is Errors, Utils {
+    Utils internal utils;
+
+    constructor() {
+        utils = new Utils();
+    }
+
+
+    /*//////////////////////////////////////////////////////////////
+                             EVENTS
+    //////////////////////////////////////////////////////////////*/
+    event log_challenge(address indexed _challenger, address indexed _challenged, uint256 _wager);
+
     /*//////////////////////////////////////////////////////////////
                              STATE VARIABLES
     //////////////////////////////////////////////////////////////*/
@@ -59,20 +72,28 @@ contract Chess is Errors{
                              FUNCTIONS
     //////////////////////////////////////////////////////////////*/
 
+
     // //start a challenge
-    function challengeAddress(address player2, uint256 _wager) external {   
+    function startChallenge(address player2, uint256 _wager) external {
         //set challengeId to true, using the Challenges.length
         isChallengeValid[Challenges.length] = true;
 
         //challenge initialized
         Games.push(Game(msg.sender, player2, address(0), address(0), _wager));
-        // assembly {
-        //     call(gas(), _wager, player2, _wager)
-        // }
+        assembly {
+            let success := call(gas(), _wager, player2, _wager, 0, 0, 0)
+            if iszero(success) { revert(0, 0) }
+        }
+        emit log_challenge(utils.msgSender(), player2, _wager);
     }
 
-    function move(uint256 gameId, uint8 piece, uint256 direction) external {
-      if (isGameValid[gameId])   revert  inValid();
+    function move(uint256 gameId, uint8 piece, uint256 direction) view external {
+        //checks if Game is valid
+        if (isGameValid[gameId]) revert inValid();
+
+        assembly {
+            //    call(gas(), caller() 1, 0, 0 ,0,0)
+        }
     }
 
     // function deposit() external payable {}
